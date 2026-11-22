@@ -1,0 +1,141 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: pockit-api-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:ares}
+  config:
+    import: optional:file:.env[.properties]
+  cloud:
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*}
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - Authorization
+              - Content-Type
+              - X-Correlation-Id
+              - Accept
+              - Origin
+            exposed-headers:
+              - X-Correlation-Id
+            allow-credentials: true
+            max-age: 3600
+      routes:
+        - id: pockit-ms-auth-user
+          uri: ${MS_AUTH_USER_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**,/api/usuarios/**,/api/security/**
+        - id: pockit-ms-accounts
+          uri: ${MS_ACCOUNTS_URI:http://localhost:8082}
+          predicates:
+            - Path=/api/cuentas/**,/api/categorias/**,/api/etiquetas/**
+        - id: pockit-ms-transactions
+          uri: ${MS_TRANSACTIONS_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/transacciones/**,/api/series/**
+        - id: pockit-ms-sync
+          uri: ${MS_SYNC_URI:http://localhost:8084}
+          predicates:
+            - Path=/api/sync/**
+        - id: pockit-ms-analytics
+          uri: ${MS_ANALYTICS_URI:http://localhost:8085}
+          predicates:
+            - Path=/api/dashboards/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    string-output-type: base64
+
+app:
+  security:
+    headers:
+      content-security-policy: ${CSP_POLICY:default-src 'none'; frame-ancestors 'none'}
+  mtls:
+    enabled: ${APP_MTLS_ENABLED:false}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: ares
+
+server:
+  ssl:
+    enabled: false
+
+app:
+  mtls:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: hermes
+
+server:
+  ssl:
+    enabled: ${SERVER_SSL_ENABLED:true}
+    key-store: ${SERVER_SSL_KEYSTORE_PATH:}
+    key-store-password: ${SERVER_SSL_KEYSTORE_PASSWORD:}
+    key-store-type: PKCS12
+    enabled-protocols:
+      - TLSv1.3
+      - TLSv1.2
+
+app:
+  mtls:
+    enabled: ${APP_MTLS_ENABLED:true}
+    keystore-path: ${APP_MTLS_KEYSTORE_PATH:}
+    keystore-password: ${APP_MTLS_KEYSTORE_PASSWORD:}
+    truststore-path: ${APP_MTLS_TRUSTSTORE_PATH:}
+    truststore-password: ${APP_MTLS_TRUSTSTORE_PASSWORD:}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: zeus
+
+server:
+  ssl:
+    enabled: ${SERVER_SSL_ENABLED:true}
+    key-store: ${SERVER_SSL_KEYSTORE_PATH:}
+    key-store-password: ${SERVER_SSL_KEYSTORE_PASSWORD:}
+    key-store-type: PKCS12
+    enabled-protocols:
+      - TLSv1.3
+      - TLSv1.2
+
+app:
+  mtls:
+    enabled: ${APP_MTLS_ENABLED:true}
+    keystore-path: ${APP_MTLS_KEYSTORE_PATH:}
+    keystore-password: ${APP_MTLS_KEYSTORE_PASSWORD:}
+    truststore-path: ${APP_MTLS_TRUSTSTORE_PATH:}
+    truststore-password: ${APP_MTLS_TRUSTSTORE_PASSWORD:}
