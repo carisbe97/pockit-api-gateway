@@ -1,0 +1,29 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+### VS Code ###
+.vscode/
+
+### Environment & Secrets ###
+.env
+.env.ares
+.env.hermes
+.env.zeus
+*.p12
+*.jks
+*.key
+*.pem
+*.crt
+
+### OS ###
+.DS_Store
+Thumbs.db
